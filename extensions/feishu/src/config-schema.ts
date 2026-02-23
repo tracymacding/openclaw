@@ -149,6 +149,8 @@ export const FeishuAccountConfigSchema = z
     renderMode: RenderModeSchema,
     streaming: StreamingModeSchema, // Enable streaming card mode (default: true)
     tools: FeishuToolsConfigSchema,
+    // Owner open ID(s) for detecting @owner mentions in group chats
+    ownerOpenId: z.union([z.string(), z.array(z.string())]).optional(),
   })
   .strict();
 
@@ -186,6 +188,8 @@ export const FeishuConfigSchema = z
     renderMode: RenderModeSchema, // raw = plain text (default), card = interactive card with markdown
     streaming: StreamingModeSchema, // Enable streaming card mode (default: true)
     tools: FeishuToolsConfigSchema,
+    // Owner open ID(s) for detecting @owner mentions in group chats
+    ownerOpenId: z.union([z.string(), z.array(z.string())]).optional(),
     // Dynamic agent creation for DM users
     dynamicAgentCreation: DynamicAgentCreationSchema,
     // Multi-account configuration

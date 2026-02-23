@@ -124,3 +124,31 @@ export function buildMentionedCardContent(targets: MentionTarget[], message: str
   const mentionParts = targets.map((t) => formatMentionForCard(t));
   return `${mentionParts.join(" ")} ${message}`;
 }
+
+/**
+ * Check if any of the owner open IDs were mentioned in the message.
+ */
+export function checkOwnerMentioned(event: FeishuMessageEvent, ownerOpenIds: string[]): boolean {
+  if (ownerOpenIds.length === 0) return false;
+  const mentions = event.message.mentions ?? [];
+  if (mentions.length > 0) {
+    return mentions.some((m) => m.id.open_id && ownerOpenIds.includes(m.id.open_id));
+  }
+  // Post (rich text) messages may have empty message.mentions when they contain docs/paste
+  if (event.message.message_type === "post") {
+    try {
+      const parsed = JSON.parse(event.message.content);
+      const contentBlocks = parsed.content || [];
+      for (const paragraph of contentBlocks) {
+        if (Array.isArray(paragraph)) {
+          for (const element of paragraph) {
+            if (element.tag === "at" && element.user_id && ownerOpenIds.includes(element.user_id)) {
+              return true;
+            }
+          }
+        }
+      }
+    } catch {}
+  }
+  return false;
+}

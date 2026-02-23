@@ -9,6 +9,7 @@ import {
 import { resolveFeishuAccount, listEnabledFeishuAccounts } from "./accounts.js";
 import { handleFeishuMessage, type FeishuMessageEvent, type FeishuBotAddedEvent } from "./bot.js";
 import { createFeishuWSClient, createEventDispatcher } from "./client.js";
+import { maybeNotifyOwnerMention } from "./owner-notify.js";
 import { probeFeishu } from "./probe.js";
 import type { ResolvedFeishuAccount } from "./types.js";
 
@@ -104,6 +105,13 @@ function registerEventHandlers(
     "im.message.receive_v1": async (data) => {
       try {
         const event = data as unknown as FeishuMessageEvent;
+        maybeNotifyOwnerMention({
+          cfg,
+          event,
+          accountId,
+          botOpenId: botOpenIds.get(accountId),
+          log,
+        }).catch((err) => error(`feishu[${accountId}]: owner-notify error: ${String(err)}`));
         const promise = handleFeishuMessage({
           cfg,
           event,
